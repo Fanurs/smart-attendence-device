@@ -78,7 +78,6 @@ class HandTracker:
             )
 
         df = []
-        max_frame_dim = max(frame.shape[:2])
         for id_, lm in enumerate(hand_landmarks.landmark):
             df.append([id_, lm.x, lm.y, lm.z])
         df = pd.DataFrame(df, columns=['id', 'x', 'y', 'z'])
