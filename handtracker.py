@@ -109,7 +109,7 @@ class HandTracker:
 
         # normalization
         norm_hand['x'] = norm_hand['x'] - norm_hand['x'][i_wrist]
-        norm_hand['y'] = -(norm_hand['y'] - norm_hand['y'][i_wrist])
+        norm_hand['y'] = norm_hand['y'] - norm_hand['y'][i_wrist]
         base_unit = np.mean([
             np.linalg.norm(norm_hand.loc[i_mid_mcp] - norm_hand.loc[i_wrist]),
             np.linalg.norm(norm_hand.loc[i_ind_mcp] - norm_hand.loc[i_wrist]),
@@ -117,6 +117,11 @@ class HandTracker:
         norm_hand['x'] /= base_unit
         norm_hand['y'] /= base_unit
         norm_hand['z'] /= base_unit
+
+        # switch signs if y and z
+        norm_hand['y'] *= -1
+        norm_hand['z'] *= -1
+
         return norm_hand
     
 class OpencvCamera:
