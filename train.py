@@ -7,6 +7,41 @@ import numpy as np
 import pandas as pd
 from sklearn.svm import SVC
 
+def main():
+    # read in and process landmark data
+    data = pd.read_csv('data/processed/landmarked.csv')
+    data.set_index(['label', 'index'], inplace=True)
+    data = clone_with_variations(data)
+
+    # convert into numpy arrays and integer labels
+    y_labels = ['unclassified', '1', '2', '3', 'thumbsup', 'thumbsdown']
+
+    X_data = data.values
+    y_data = data.index.get_level_values('label').values
+    y_data = np.array([y_labels.index(y) for y in y_data])
+    indices = np.arange(len(y_data))
+    np.random.shuffle(indices)
+    X_data = X_data[indices]
+    y_data = y_data[indices]
+
+    # prepare training data
+    X_train = X_data[:2000]
+    y_train = y_data[:2000]
+
+    # prepare testing data
+    X_test = X_data[2000:]
+    y_test = y_data[2000:]
+
+    # train SVC
+    svc = SVC(C=10**3, gamma=10**-1, kernel='rbf')
+    svc.fit(X_train, y_train)
+    print(f'Training score: {svc.score(X_train, y_train):.3f}')
+    print(f'Testing score: {svc.score(X_test, y_test):.3f}')
+
+    # save model
+    with open('model.pkl', 'wb') as file:
+        pickle.dump(svc, file, protocol=4)
+
 def draw_landmarks(df_input, rotate_y=0, mirror=False):
     """Draw the landmarks with matplotlib.
 
@@ -86,36 +121,4 @@ def clone_with_variations(data):
     return result
 
 if __name__ == '__main__':
-    # read in and process landmark data
-    data = pd.read_csv('data/processed/landmarked.csv')
-    data.set_index(['label', 'index'], inplace=True)
-    data = clone_with_variations(data)
-
-    # convert into numpy arrays and integer labels
-    y_labels = ['unclassified', '1', '2', '3', 'thumbsup', 'thumbsdown']
-
-    X_data = data.values
-    y_data = data.index.get_level_values('label').values
-    y_data = np.array([y_labels.index(y) for y in y_data])
-    indices = np.arange(len(y_data))
-    np.random.shuffle(indices)
-    X_data = X_data[indices]
-    y_data = y_data[indices]
-
-    # prepare training data
-    X_train = X_data[:2000]
-    y_train = y_data[:2000]
-
-    # prepare testing data
-    X_test = X_data[2000:]
-    y_test = y_data[2000:]
-
-    # train SVC
-    svc = SVC(C=10**3, gamma=10**-1, kernel='rbf')
-    svc.fit(X_train, y_train)
-    print(f'Training score: {svc.score(X_train, y_train):.3f}')
-    print(f'Testing score: {svc.score(X_test, y_test):.3f}')
-
-    # save model
-    with open('model1.pkl', 'wb') as file:
-        pickle.dump(svc, file, protocol=4)
+    main()
